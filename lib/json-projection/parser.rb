@@ -368,7 +368,7 @@ module JsonProjection
         case ch
         when DIGIT
           @value_buffer << ch
-          return :start_int, events
+          return :start_int, Fifo.empty
         when POINT
           @value_buffer << ch
           return :start_float, Fifo.empty
