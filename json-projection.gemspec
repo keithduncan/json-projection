@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/keithduncan/json-projection'
   s.license     = 'MIT'
 
+  s.add_development_dependency 'rake', '~> 11.2.2'
   s.add_development_dependency 'byebug', '~> 5.0.0'
   s.add_development_dependency 'minitest-focus', '~> 1.1.2'
 end

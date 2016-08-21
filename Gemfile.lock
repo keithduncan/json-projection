@@ -12,6 +12,7 @@ GEM
     minitest (5.9.0)
     minitest-focus (1.1.2)
       minitest (>= 4, < 6)
+    rake (11.2.2)
 
 PLATFORMS
   ruby
@@ -20,6 +21,7 @@ DEPENDENCIES
   byebug (~> 5.0.0)
   json-projection!
   minitest-focus (~> 1.1.2)
+  rake (~> 11.2.2)
 
 BUNDLED WITH
    1.12.5
