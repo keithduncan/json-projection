@@ -1,10 +1,10 @@
 require_relative 'test_helper'
 
-class TopLevelTest < JsonProjectorTest
+class NullProjection < JsonProjectorTest
 
   def test_empty_object_projection
-    projector = JsonProjection::Projector(stream("{}"))
-    assert_equal {}, projector.project(nil)
+    projector = JsonProjection::Projector.new(stream("{}"))
+    assert_equal({}, projector.project(nil))
   end
 
 end

@@ -3,7 +3,7 @@ require_relative '../test_helper'
 class JsonProjectorTest < MiniTest::Unit::TestCase
 
   def stream(str)
-    StreamIO.new(str)
+    StringIO.new(str)
   end
 
 end
