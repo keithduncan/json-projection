@@ -2,6 +2,15 @@ module JsonProjection
 
   # Sum type
   class StreamEvent
+
+    def ==(other)
+      return false unless other.is_a?(self.class)
+    end
+
+    def hash
+      self.class.hash
+    end
+
   end
 
   class StartDocument < StreamEvent
@@ -27,12 +36,26 @@ module JsonProjection
     def initialize(key)
       @key = key
     end
+
+    def ==(other)
+      return false unless super(other)
+      return key == other.key
+    end
+
+    def hash
+      key.hash
+    end
   end
 
   class Value < StreamEvent
     attr_reader :value
     def initialize(value)
       @value = value
+    end
+
+    def ==(other)
+      return false unless super(other)
+      return value == other.value
     end
   end
 
