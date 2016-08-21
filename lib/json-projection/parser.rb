@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-module JsonProject
+module JsonProjection
   module Stream
     # Raised on any invalid JSON text.
     ParserError = Class.new(RuntimeError)

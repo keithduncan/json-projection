@@ -1,4 +1,4 @@
-module JsonProject
+module JsonProjection
 
   # Sum type
   class StreamEvent

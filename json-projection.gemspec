@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name        = 'json-project'
+  s.name        = 'json-projection'
   s.version     = '0.1.0'
   s.date        = '2016-08-21'
   s.summary     = "JSON structure preserving transform"
@@ -7,9 +7,12 @@ Gem::Specification.new do |s|
   s.authors     = ["Keith Duncan"]
   s.email       = 'keith.duncan@github.com'
   s.files       = [
-    "lib/json-project.rb",
-    "lib/json-project/scanner.rb",
+    "lib/json-projection.rb",
+    "lib/json-projection/scanner.rb",
+    "lib/json-projection/errors.rb",
+    "lib/json-projection/events.rb",
+    "lib/json-projection/parser.rb",
   ]
-  s.homepage    = 'https://github.com/keithduncan/json-project'
+  s.homepage    = 'https://github.com/keithduncan/json-projection'
   s.license     = 'MIT'
 end

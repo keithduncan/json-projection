@@ -1,4 +1,4 @@
-module JsonProject
+module JsonProjection
   class Error < StandardError
   end
 
