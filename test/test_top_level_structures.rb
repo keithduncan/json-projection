@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require 'json-projection'
 
-class JsonProjectionTopLevelTest < Minitest::Test
+class JsonProjectionTopLevelTest < MiniTest::Unit::TestCase
   def test_top_level_object
     events = read_event_stream(StringIO.new("{}"))
     assert_equal [JsonProjection::StartDocument, JsonProjection::StartObject, JsonProjection::EndObject, JsonProjection::EndDocument], events
