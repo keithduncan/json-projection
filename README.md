@@ -27,9 +27,14 @@ don't need:
     "age": 26,
     "jobs": [
       {
+        "title": "director of overworking",
+        "company": "south coast software",
+        "department": "most",
+      },
+      {
         "title": "some kind of computering",
         "company": "github the website dot com",
-        "department": true,
+        "department": true
       }
     ]
   },
@@ -62,10 +67,22 @@ projector = JsonProjection::Projector.new(stream)
 schema = {
   "user" => {
     "name" => nil,
-    "jobs" => nil,
+    "jobs" => {
+      "title" => nil,
+    },
   },
 }
 data = projector.project(schema)
 
-# use data
+# data = {
+#   "user" => {
+#     "name" => "keith",
+#     "jobs" => [
+#       { "title" => "director of overworking" },
+#       { "title" => "some kind of computering" },
+#     ]
+#   }
+# }
+#
+# use data...
 ```

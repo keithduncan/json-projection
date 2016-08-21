@@ -2,7 +2,7 @@ require_relative 'test_helper'
 
 class ReadmeExample < JsonProjectorTest
   def test_readme_example
-    json = <<EOJ
+    json = <<-EOJ
     {
       "user": {
         "name": "keith",
@@ -52,6 +52,6 @@ EOJ
           { "title" => "some kind of computering" },
         ]
       }
-    }, project(schema, over: json))
+    }, project(schema, json: json))
   end
 end

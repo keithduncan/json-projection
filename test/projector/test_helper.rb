@@ -11,8 +11,12 @@ class JsonProjectorTest < Minitest::Test
     StringIO.new(str)
   end
 
-  def project(schema, over: "")
-    Projector.new(stream(over.to_json)).project(schema)
+  def project(schema, over: "", json: nil)
+    if json == nil
+      json = over.to_json
+    end
+
+    Projector.new(stream(json)).project(schema)
   end
 
 end
