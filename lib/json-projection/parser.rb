@@ -130,7 +130,9 @@ module JsonProjection
 
     private
 
-    attr_reader :stream
+    def stream
+      @stream
+    end
 
     # Given a state and new character, return a new state and fifo of events to
     # yield to pull callers.

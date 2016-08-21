@@ -102,17 +102,6 @@ class ObjectStructure < JsonParserTest
     ], events("{\"foo\": 0.1}")
   end
 
-  def test_integer_value
-    assert_equal [
-      StartDocument.empty,
-      StartObject.empty,
-      Key.new("foo"),
-      Number.new(100),
-      EndObject.empty,
-      EndDocument.empty
-    ], events("{\"foo\": 100}")
-  end
-
   def test_exponent_value
     assert_equal [
       StartDocument.empty,
