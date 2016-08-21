@@ -1,0 +1,21 @@
+PATH
+  remote: .
+  specs:
+    json-projection (0.1.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    byebug (5.0.0)
+      columnize (= 0.9.0)
+    columnize (0.9.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  byebug (~> 5.0.0)
+  json-projection!
+
+BUNDLED WITH
+   1.12.5
