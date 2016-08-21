@@ -3,6 +3,8 @@ require_relative '../test_helper'
 class JsonParserTest < MiniTest::Unit::TestCase
   include JsonProjection
 
+  parallelize_me!
+
   def stream(string)
     StringIO.new(string)
   end

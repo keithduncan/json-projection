@@ -1,8 +1,6 @@
 require_relative 'test_helper'
 
 class ObjectStructure < JsonParserTest
-  parallelize_me!
-
   def test_simple_key_value_pair
     assert_equal [
       StartDocument.empty,
