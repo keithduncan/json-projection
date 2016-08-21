@@ -76,6 +76,7 @@ module JsonProjection
       @event_buffer = Fifo.new
 
       @bytes_buffer = Buffer.new
+      @bytes = nil
 
       @pos = -1
       @state = :start_document
@@ -99,16 +100,16 @@ module JsonProjection
       end
 
       while true do
-        if @bytes_buffer.empty?
+        if @bytes.nil? || @bytes.empty?
           data = stream.read(BUF_SIZE)
           if data == nil # hit EOF
             error("unexpected EOF")
           end
 
-          @bytes_buffer << data
+          @bytes = @bytes_buffer.<<(data)
         end
 
-        @bytes_buffer.each_char do |ch|
+        @bytes.each_char do |ch|
           @pos += 1
 
           new_state, events = handle_character(ch)
