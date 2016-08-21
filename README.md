@@ -14,3 +14,58 @@ data. Internally it constructs a parser to pull events from. Given a schema of
 data you are interested in `Projector` will pull events and ignore the subtrees
 you don't need, constructing the subtrees only for those portions of the
 document you are interested in.
+
+## Examples
+
+Given the following JSON data, imagine it continuing with many more keys you
+don't need:
+
+```json
+{
+  "user": {
+    "name": "keith",
+    "age": 26,
+    "jobs": [
+      {
+        "title": "some kind of computering",
+        "company": "github the website dot com",
+        "department": true,
+      }
+    ]
+  },
+  "another key": {
+
+  },
+  "woah this document is huge": {
+
+  },
+  "many megabytes": {
+
+  },
+  "etc": {
+
+  }
+}
+```
+
+We only need the `user` key, and really just the the `name` and `jobs` keys.
+We could implementing a schema-specific streaming event handler for this data to
+ignore the keys we don't want and generate an object model for the ones we do.
+That's a pain to build and maintain, what we really want is a projection over
+the data just like we do when `SELECT list, of, keys FROM table`.
+
+```ruby
+stream = File.open("somewhere.json", "r")
+
+projector = JsonProjection::Projector.new(stream)
+
+schema = {
+  "user" => {
+    "name" => nil,
+    "jobs" => nil,
+  },
+}
+data = projector.project(schema)
+
+# use data
+```
