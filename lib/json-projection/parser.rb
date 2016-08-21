@@ -391,26 +391,26 @@ module JsonProjection
         end
 
       when :start_true
-        event = keyword(TRUE_KEYWORD, true, TRUE_RE, ch)
-        if event.nil?
+        state, event = keyword(TRUE_KEYWORD, true, TRUE_RE, ch)
+        if state.nil?
           return :start_true, Fifo.empty
         end
 
-        return :end_value, Fifo.pure(event)
+        return state, Fifo.pure(event)
       when :start_false
-        event = keyword(FALSE_KEYWORD, false, FALSE_RE, ch)
-        if event.nil?
+        state, event = keyword(FALSE_KEYWORD, false, FALSE_RE, ch)
+        if state.nil?
           return :start_false, Fifo.empty
         end
 
-        return :end_value, Fifo.pure(event)
+        return state, Fifo.pure(event)
       when :start_null
-        event = keyword(NULL_KEYWORD, nil, NULL_RE, ch)
-        if event.nil?
+        state, event = keyword(NULL_KEYWORD, nil, NULL_RE, ch)
+        if state.nil?
           return :start_null, Fifo.empty
         end
 
-        return :end_value, Fifo.pure(event)
+        return state, Fifo.pure(event)
 
       when :end_key
         case ch
@@ -533,7 +533,7 @@ module JsonProjection
       if @value_buffer.size != word.size
         return nil
       elsif @value_buffer == word
-        event = end_value(@value_buffer)
+        event = end_value(value)
         @value_buffer.clear
 
         return :end_value, event
