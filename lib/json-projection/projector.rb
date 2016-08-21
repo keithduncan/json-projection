@@ -50,6 +50,38 @@ module JsonProjection
     end
 
     def filter_subtree(schema, event)
+      if event.is_a?(StartArray)
+        return filter_array_subtree(schema, event)
+      end
+
+      if event.is_a?(StartObject)
+        return filter_object_subtree(schema, event)
+      end
+
+      raise StandardError, "cannot filter #{event.class} subtree"
+    end
+
+    def filter_array_subtree(schema, event)
+      unless event.is_a?(StartArray)
+        raise StandardError, "expected start array"
+      end
+
+      result = []
+
+      while (value_event = next_event) != EndArray.new
+        value = if value_event.is_a?(StartObject) || value_event.is_a?(StartArray)
+          filter_subtree(schema, value_event)
+        else
+          build_subtree(value_event)
+        end
+
+        result << value
+      end
+
+      result
+    end
+
+    def filter_object_subtree(schema, event)
       unless event.is_a?(StartObject)
         raise StandardError, "expected start object"
       end
@@ -73,7 +105,7 @@ module JsonProjection
 
         value_event = next_event
 
-        value = if value_event.is_a?(StartObject)
+        value = if value_event.is_a?(StartObject) || value_event.is_a?(StartArray)
           # objects can have subschemas, look it up then build the value using
           # filter
           key_schema = if schema.nil?
