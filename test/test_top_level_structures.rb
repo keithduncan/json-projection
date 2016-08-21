@@ -1,6 +1,8 @@
 require 'minitest/autorun'
 require 'json-projection'
 
+require 'stringio'
+
 class JsonProjectionTopLevelTest < MiniTest::Unit::TestCase
   def test_top_level_object
     events = read_event_stream(StringIO.new("{}"))
