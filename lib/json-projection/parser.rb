@@ -25,6 +25,7 @@
 
 require_relative 'events'
 require_relative 'errors'
+require_relative 'fifo'
 
 module JsonProjection
 
