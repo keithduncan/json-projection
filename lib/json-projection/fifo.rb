@@ -2,7 +2,7 @@ module JsonProjection
   class Fifo
 
     def self.empty
-      @empty || = self.new
+      @empty ||= self.new
     end
 
     def self.pure(val)
