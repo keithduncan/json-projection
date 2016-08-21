@@ -1,4 +1,4 @@
-require_relative 'json-projection/scanner'
+require_relative 'json-projection/parser'
 
 module JsonProject
 
