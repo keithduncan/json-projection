@@ -1,5 +1,5 @@
 require_relative 'json-projection/parser'
 
-module JsonProject
+module JsonProjection
 
 end
