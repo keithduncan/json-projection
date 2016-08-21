@@ -106,21 +106,23 @@ module JsonProjection
             error("unexpected EOF")
           end
 
-          @bytes = @bytes_buffer.<<(data)
+          @bytes = @bytes_buffer.<<(data).each_char.to_a
         end
 
-        @bytes.each_char do |ch|
-          @pos += 1
+        head = @bytes.first
+        tail = @bytes.slice!(1, @bytes.size - 1)
 
-          new_state, events = handle_character(@state, ch)
+        @bytes = tail
+        @pos += 1
 
-          @state = new_state
-          @event_buffer = events.append(@event_buffer)
+        new_state, events = handle_character(@state, head)
 
-          unless @event_buffer.empty?
-            @event_buffer, event = @event_buffer.pop
-            return event
-          end
+        @state = new_state
+        @event_buffer = events.append(@event_buffer)
+
+        unless @event_buffer.empty?
+          @event_buffer, event = @event_buffer.pop
+          return event
         end
       end
     end
