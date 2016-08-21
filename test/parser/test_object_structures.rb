@@ -63,7 +63,7 @@ class ObjectStructure < JsonParserTest
       StartDocument.empty,
       StartObject.empty,
       Key.new("foo"),
-      Null.new(nil),
+      Null.empty,
       EndObject.empty,
       EndDocument.empty
     ], events("{\"foo\": null}")

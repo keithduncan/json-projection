@@ -73,6 +73,9 @@ module JsonProjection
   end
 
   class Null < Value
+    def self.empty
+      new(nil)
+    end
   end
 
 end
