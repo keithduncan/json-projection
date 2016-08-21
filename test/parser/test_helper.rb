@@ -1,6 +1,6 @@
 require_relative '../test_helper'
 
-class JsonParserTest < MiniTest::Unit::TestCase
+class JsonParserTest < Minitest::Test
   include JsonProjection
 
   parallelize_me!

@@ -2,7 +2,7 @@ require_relative '../test_helper'
 
 require 'json'
 
-class JsonProjectorTest < MiniTest::Unit::TestCase
+class JsonProjectorTest < Minitest::Test
   include JsonProjection
 
   parallelize_me!
