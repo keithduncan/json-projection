@@ -17,6 +17,12 @@ module JsonProjection
     # Given a JSON schema of properties we are interested in, filter the input
     # stream to just these properties.
     #
+    # Note this is not a schema validator, the schema is _navigated_ to
+    # determine interesting-ness but if you specify a schema for a key that
+    # turns out to be a number it _will be included_. The projection only cares
+    # about whether things are interesting while advancing through the stream.
+    # To validate the schema, use another class on the resulting projection.
+    #
     # schema :: nil | Hash<String, schema>
     #           Map of the keys we are interested in, recurses.
     #
