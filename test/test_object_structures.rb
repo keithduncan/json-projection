@@ -37,4 +37,17 @@ class ObjectStructure < JsonProjectionTest
       EndDocument.empty
     ], events("{\"foo\": \"bar\", \"qux\": \"quux\"}")
   end
+
+  def test_boolean_values
+    assert_equal [
+      StartDocument.empty,
+      StartObject.empty,
+      Key.new("foo"),
+      Boolean.new(true),
+      Key.new("bar"),
+      Boolean.new(false),
+      EndObject.empty,
+      EndDocument.empty
+    ], events("{\"foo\": true, \"qux\": false}")
+  end
 end
