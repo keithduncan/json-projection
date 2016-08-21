@@ -27,17 +27,65 @@ module JsonProjection
         raise StandardError, "expected document start"
       end
 
-      case schema
-      when NilClass
-        return build_value
-      when Hash
-        return filter_value(schema)
+      value = build_value(schema)
+
+      event = @parser.next_event
+      unless event.is_a?(EndDocument)
+        raise StandardError, "expected document end"
       end
 
-      raise StandardError, "unsupported schema type #{schema.class}"
+      return value
     end
 
     private
+
+    def build_value(schema)
+      case schema
+      when NilClass
+        # Once nil is hit in the schema the subtree is built fully
+        build_subtree
+      when Hash
+        # If the schema is a hash only build subtrees for the interesting key
+        filter_subtree(schema)
+      end
+    end
+
+    def build_subtree(event)
+      case event
+
+      when Null, Boolean, Number, String
+        event.value
+
+      when StartArray
+        result = []
+
+        while (event = next_event) != EndArray.new
+          result << build_subtree(event)
+        end
+
+        result
+
+      when StartObject
+        result = {}
+
+        while (event = next_event) != EndObject.new
+          key = next_event
+          unless key.is_a?(Key)
+            raise StandardError, "expected a key event"
+          end
+
+          result[key.key] = build_subtree(next_event)
+        end
+
+      else
+        raise StandardError, "cannot build subtree for #{event.class}"
+
+      end
+    end
+
+    def filter_subtree(schema)
+
+    end
 
     # After reading a key if we know we are not interested in the next value,
     # read and discard all its stream events.
@@ -92,14 +140,6 @@ module JsonProjection
           depth -= 1
         end
       end
-    end
-
-    def build_value
-      nil
-    end
-
-    def filter_value(schema)
-      nil
     end
 
   end

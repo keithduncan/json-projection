@@ -72,7 +72,7 @@ module JsonProjection
   class Boolean < Value
   end
 
-  class Null < StreamEvent
+  class Null < Value
   end
 
 end

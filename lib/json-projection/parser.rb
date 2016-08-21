@@ -580,7 +580,7 @@ module JsonProjection
       when ::String
         JsonProjection::String.new(value)
       when NilClass
-        Null.new
+        Null.new(nil)
       end
     end
 
