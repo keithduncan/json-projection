@@ -81,6 +81,7 @@ module JsonProjection
       @stack = []
 
       @value_buffer = nil
+      @unicode = ""
     end
 
     # Draw bytes from the stream until an event can be constructed. May raise
@@ -89,10 +90,8 @@ module JsonProjection
     # Returns a JsonProject::StreamEvent subclass or raises StandardError.
     def next_event()
       # Are there any already read events, return the oldest
-      event = @event_buffer.pop
-      unless event.nil?
-        return event
-      end
+      @event_buffer, event = @event_buffer.pop
+      return event unless event.nil?
 
       if @state == :end_document
         error("already EOF, no more events")
@@ -110,267 +109,15 @@ module JsonProjection
 
         @bytes_buffer.each_char do |ch|
           @pos += 1
-          case @state
-          when :start_document
-            case ch
-            when WS
-              # nop
-            when LEFT_BRACE
-              @state = :start_object
-              @stack.push(:object)
 
-              @event_buffer.push(StartObject.new)
-            when LEFT_BRACKET
-              @state = :start_array
-              @stack.push(:array)
+          new_state, events = handle_character(ch)
 
-              @event_buffer.push(StartArray.new)
-            else
-              error('Expected whitespace, object `{` or array `[` start token')
-            end
+          @state = new_state
+          @event_buffer = events.append(@event_buffer)
 
-            return StartDocument.new
-          when :start_object
-            case ch
-            when WS
-              # ignore
-            when QUOTE
-              @state = :start_string
-              @stack.push(:key)
-            when RIGHT_BRACE
-              return prepend_and_pop(end_container(:object))
-            else
-              error('Expected object key `"` start')
-            end
-          when :start_string
-            case ch
-            when QUOTE
-              if @stack.pop == :string
-                event = end_value(@value_buffer.dup)
-                @value_buffer.clear
-
-                return event
-              else # :key
-                @state = :end_key
-
-                event = Key.new(@value_buffer.dup)
-                return event
-              end
-            when BACKSLASH
-              @state = :start_escape
-            when CONTROL
-              error('Control characters must be escaped')
-            else
-              @value_buffer << ch
-            end
-          when :start_escape
-            case ch
-            when QUOTE, BACKSLASH, SLASH
-              @value_buffer << ch
-              @state = :start_string
-            when B
-              @value_buffer << "\b"
-              @state = :start_string
-            when F
-              @value_buffer << "\f"
-              @state = :start_string
-            when N
-              @value_buffer << "\n"
-              @state = :start_string
-            when R
-              @value_buffer << "\r"
-              @state = :start_string
-            when T
-              @value_buffer << "\t"
-              @state = :start_string
-            when U
-              @state = :unicode_escape
-            else
-              error('Expected escaped character')
-            end
-          when :unicode_escape
-            case ch
-            when HEX
-              @unicode << ch
-              if @unicode.size == 4
-                codepoint = @unicode.slice!(0, 4).hex
-                if codepoint >= 0xD800 && codepoint <= 0xDBFF
-                  error('Expected low surrogate pair half') if @stack[-1].is_a?(Fixnum)
-                  @state = :start_surrogate_pair
-                  @stack.push(codepoint)
-                elsif codepoint >= 0xDC00 && codepoint <= 0xDFFF
-                  high = @stack.pop
-                  error('Expected high surrogate pair half') unless high.is_a?(Fixnum)
-                  pair = ((high - 0xD800) * 0x400) + (codepoint - 0xDC00) + 0x10000
-                  @value_buffer << pair
-                  @state = :start_string
-                else
-                  @value_buffer << codepoint
-                  @state = :start_string
-                end
-              end
-            else
-              error('Expected unicode escape hex digit')
-            end
-          when :start_surrogate_pair
-            case ch
-            when BACKSLASH
-              @state = :start_surrogate_pair_u
-            else
-              error('Expected low surrogate pair half')
-            end
-          when :start_surrogate_pair_u
-            case ch
-            when U
-              @state = :unicode_escape
-            else
-              error('Expected low surrogate pair half')
-            end
-          when :start_negative_number
-            case ch
-            when ZERO
-              @state = :start_zero
-              @value_buffer << ch
-            when DIGIT_1_9
-              @state = :start_int
-              @value_buffer << ch
-            else
-              error('Expected 0-9 digit')
-            end
-          when :start_zero
-            case ch
-            when POINT
-              @state = :start_float
-              @value_buffer << ch
-            when EXPONENT
-              @state = :start_exponent
-              @value_buffer << ch
-            else
-              end_value(@value_buffer.to_i)
-              @value_buffer = ""
-              @pos -= 1
-              redo
-            end
-          when :start_float
-            case ch
-            when DIGIT
-              @state = :in_float
-              @value_buffer << ch
-            else
-              error('Expected 0-9 digit')
-            end
-          when :in_float
-            case ch
-            when DIGIT
-              @value_buffer << ch
-            when EXPONENT
-              @state = :start_exponent
-              @value_buffer << ch
-            else
-              end_value(@value_buffer.to_f)
-              @value_buffer = ""
-              @pos -= 1
-              redo
-            end
-          when :start_exponent
-            case ch
-            when MINUS, PLUS, DIGIT
-              @state = :in_exponent
-              @buf << ch
-            else
-              error('Expected +, -, or 0-9 digit')
-            end
-          when :in_exponent
-            case ch
-            when DIGIT
-              @value_buffer << ch
-            else
-              error('Expected 0-9 digit') unless @value_buffer =~ DIGIT_END
-              end_value(@value_buffer.to_f)
-              @value_buffe = ""
-              @pos -= 1
-              redo
-            end
-          when :start_int
-            case ch
-            when DIGIT
-              @value_buffer << ch
-            when POINT
-              @state = :start_float
-              @value_buffer << ch
-            when EXPONENT
-              @state = :start_exponent
-              @value_buffer << ch
-            else
-              end_value(@value_buffer.to_i)
-              @value_buffer = ""
-              @pos -= 1
-              redo
-            end
-          when :start_true
-            event = keyword(TRUE_KEYWORD, true, TRUE_RE, ch)
-            unless event.nil?
-              return event
-            end
-          when :start_false
-            event = keyword(FALSE_KEYWORD, false, FALSE_RE, ch)
-            unless event.nil?
-              return event
-            end
-          when :start_null
-            event = keyword(NULL_KEYWORD, nil, NULL_RE, ch)
-            unless event.nil?
-              return event
-            end
-          when :end_key
-            case ch
-            when COLON
-              @state = :key_sep
-            when WS
-              # ignore
-            else
-              error('Expected colon key separator')
-            end
-          when :key_sep
-            start_value(ch)
-          when :start_array
-            case ch
-            when WS
-              # ignore
-            when RIGHT_BRACKET
-              return prepend_and_pop(end_container(:array))
-            else
-              start_value(ch)
-            end
-          when :end_value
-            case ch
-            when WS
-              # ignore
-            when COMMA
-              @state = :value_sep
-            when RIGHT_BRACE
-              return prepend_and_pop(end_container(:object))
-            when RIGHT_BRACKET
-              return prepend_and_pop(end_container(:array))
-            else
-              error('Expected comma `,` object `}` or array `]` close')
-            end
-          when :value_sep
-            if @stack[-1] == :object
-              case ch
-              when WS
-                # ignore
-              when QUOTE
-                @state = :start_string
-                @stack.push(:key)
-              else
-                error('Expected object key start')
-              end
-            else
-              start_value(ch)
-            end
-          when :end_document
-            error('Unexpected data') unless ch =~ WS
+          unless @event_buffer.empty?
+            @event_buffer, event = @event_buffer.pop
+            return event
           end
         end
       end
@@ -390,6 +137,341 @@ module JsonProjection
 
     private
 
+    # Given a state and new character, return a new state and fifo of events to
+    # yield to pull callers.
+    #
+    # state :: Symbol
+    #
+    # ch    :: String
+    #
+    # Returns a tuple of (Symbol, Fifo<Event>) or raises StandardError.
+    def handle_character(state, ch)
+      case state
+      when :start_document
+        case ch
+        when WS
+          return :start_document, Fifo.empty
+        when LEFT_BRACE
+          @stack.push(:object)
+
+          events = Fifo.pure(StartDocument.new).push(StartObject.new)
+
+          return :start_object, events
+        when LEFT_BRACKET
+          @stack.push(:array)
+
+          events = Fifo.pure(StartDocument.new).push(StartArray.new)
+
+          return :start_array, events
+        end
+
+        error('Expected whitespace, object `{` or array `[` start token')
+
+      when :start_object
+        case ch
+        when WS
+          return :start_object, Fifo.empty
+        when QUOTE
+          @stack.push(:key)
+          return :start_string, Fifo.empty
+        when RIGHT_BRACE
+          return end_container(:object)
+        end
+
+        error('Expected object key `"` start')
+
+      when :start_string
+        case ch
+        when QUOTE
+          if @stack.pop == :string
+            events = Fifo.pure(end_value(@value_buffer.dup))
+            @value_buffer.clear
+
+            return :end_value, events
+          else # :key
+            events = Fifo.pure(Key.new(@value_buffer.dup))
+            @value_buffer.clear
+
+            return :end_key, events
+          end
+        when BACKSLASH
+          return :start_escape, Fifo.empty
+        when CONTROL
+          error('Control characters must be escaped')
+        else
+          @value_buffer << ch
+          return :start_string, Fifo.empty
+        end
+
+      when :start_escape
+        case ch
+        when QUOTE, BACKSLASH, SLASH
+          @value_buffer << ch
+          return :start_string, Fifo.empty
+        when B
+          @value_buffer << "\b"
+          return :start_string, Fifo.empty
+        when F
+          @value_buffer << "\f"
+          return :start_string, Fifo.empty
+        when N
+          @value_buffer << "\n"
+          return :start_string, Fifo.empty
+        when R
+          @value_buffer << "\r"
+          return :start_string, Fifo.empty
+        when T
+          @value_buffer << "\t"
+          return :start_string, Fifo.empty
+        when U
+          return :unicode_escape, Fifo.empty
+        else
+          error('Expected escaped character')
+        end
+
+      when :unicode_escape
+        case ch
+        when HEX
+          @unicode << ch
+          if @unicode.size == 4
+            codepoint = @unicode.slice!(0, 4).hex
+            if codepoint >= 0xD800 && codepoint <= 0xDBFF
+              error('Expected low surrogate pair half') if @stack[-1].is_a?(Fixnum)
+              @stack.push(codepoint)
+              return :start_surrogate_pair, Fifo.empty
+            elsif codepoint >= 0xDC00 && codepoint <= 0xDFFF
+              high = @stack.pop
+              error('Expected high surrogate pair half') unless high.is_a?(Fixnum)
+              pair = ((high - 0xD800) * 0x400) + (codepoint - 0xDC00) + 0x10000
+              @value_buffer << pair
+              return :start_string, Fifo.empty
+            else
+              @value_buffer << codepoint
+              return :start_string, Fifo.empty
+            end
+          end
+
+          return :unicode_escape, Fifo.empty
+        else
+          error('Expected unicode escape hex digit')
+        end
+
+      when :start_surrogate_pair
+        case ch
+        when BACKSLASH
+          return :start_surrogate_pair_u, Fifo.empty
+        else
+          error('Expected low surrogate pair half')
+        end
+
+      when :start_surrogate_pair_u
+        case ch
+        when U
+          return :unicode_escape, Fifo.empty
+        else
+          error('Expected low surrogate pair half')
+        end
+
+      when :start_negative_number
+        case ch
+        when ZERO
+          @value_buffer << ch
+          return :start_zero, Fifo.empty
+        when DIGIT_1_9
+          @value_buffer << ch
+          return :start_int, Fifo.empty
+        else
+          error('Expected 0-9 digit')
+        end
+
+      when :start_zero
+        case ch
+        when POINT
+          @value_buffer << ch
+          return :start_float, Fifo.empty
+        when EXPONENT
+          @value_buffer << ch
+          return :start_exponent, Fifo.empty
+        else
+          events = Fifo.pure(end_value(@value_buffer.to_i))
+          @value_buffer.clear
+
+          state = :end_value
+          @pos -= 1
+
+          state, new_events = handle_character(state, ch)
+
+          return state, new_events.append(events)
+        end
+
+      when :start_float
+        case ch
+        when DIGIT
+          @value_buffer << ch
+          return :in_float, Fifo.empty
+        end
+
+        error('Expected 0-9 digit')
+
+      when :in_float
+        case ch
+        when DIGIT
+          @value_buffer << ch
+          return :in_float, Fifo.empty
+        when EXPONENT
+          @value_buffer << ch
+          return :start_exponent, Fifo.empty
+        else
+          events = Fifo.pure(end_value(@value_buffer.to_f))
+          @value_buffer.clear
+
+          state = :end_value
+          @pos -= 1
+
+          state, new_events = handle_character(state, ch)
+
+          return state, new_events.append(events)
+        end
+
+      when :start_exponent
+        case ch
+        when MINUS, PLUS, DIGIT
+          @value_buffer << ch
+          return :in_exponent, Fifo.empty
+        end
+
+        error('Expected +, -, or 0-9 digit')
+
+      when :in_exponent
+        case ch
+        when DIGIT
+          @value_buffer << ch
+          return :in_exponent, Fifo.empty
+        else
+          error('Expected 0-9 digit') unless @value_buffer =~ DIGIT_END
+
+          events = Fifo.pure(end_value(@value_buffer.to_f))
+          @value_buffer.clear
+
+          state = :end_value
+          @pos -= 1
+
+          state, new_events = handle_character(state, ch)
+
+          return state, new_events.append(events)
+        end
+
+      when :start_int
+        case ch
+        when DIGIT
+          @value_buffer << ch
+          return :state_int, events
+        when POINT
+          @value_buffer << ch
+          return :start_float, Fifo.empty
+        when EXPONENT
+          @value_buffer << ch
+          return :start_exponent, Fifo.empty
+        else
+          events = Fifo.pure(end_value(@value_buffer.to_i))
+          @value_buffer.clear
+
+          state = :end_value
+          @pos -= 1
+
+          state, new_events = handle_character(state, ch)
+
+          return state, new_events.append(events)
+        end
+
+      when :start_true
+        event = keyword(TRUE_KEYWORD, true, TRUE_RE, ch)
+        if event.nil?
+          return :start_true, Fifo.empty
+        end
+
+        return :end_value, Fifo.pure(event)
+      when :start_false
+        event = keyword(FALSE_KEYWORD, false, FALSE_RE, ch)
+        if event.nil?
+          return :start_false, Fifo.empty
+        end
+
+        return :end_value, Fifo.pure(event)
+      when :start_null
+        event = keyword(NULL_KEYWORD, nil, NULL_RE, ch)
+        if event.nil?
+          return :start_null, Fifo.empty
+        end
+
+        return :end_value, Fifo.pure(event)
+
+      when :end_key
+        case ch
+        when WS
+          return :end_key, Fifo.empty
+        when COLON
+          return :key_sep, Fifo.empty
+        end
+
+        error('Expected colon key separator')
+
+      when :key_sep
+        case ch
+        when WS
+          return :key_sep, Fifo.empty
+        else
+          return start_value(ch)
+        end
+
+      when :start_array
+        case ch
+        when WS
+          return :start_array, Fifo.empty
+        when RIGHT_BRACKET
+          return end_container(:array)
+        else
+          return start_value(ch)
+        end
+
+      when :end_value
+        case ch
+        when WS
+          return :end_value, Fifo.empty
+        when COMMA
+          return :value_sep, Fifo.empty
+        when RIGHT_BRACE
+          return end_container(:object)
+        when RIGHT_BRACKET
+          return end_container(:array)
+        end
+
+        error('Expected comma `,` object `}` or array `]` close')
+
+      when :value_sep
+        if @stack[-1] == :object
+          case ch
+          when WS
+            return :value_sep, Fifo.empty
+          when QUOTE
+            @stack.push(:key)
+            return :start_string, Fifo.empty
+          end
+
+          error('Expected whitespace or object key start `"`')
+        end
+
+        case WS
+          return :value_sep, Fifo.empty
+        else
+          return start_value(ch)
+        end
+
+      when :end_document
+        error('Unexpected data') unless ch =~ WS
+      end
+    end
+
     # Complete an object or array container value type.
     #
     # type - The Symbol, :object or :array, of the expected type.
@@ -397,31 +479,30 @@ module JsonProjection
     # Raises a JSON::Stream::ParserError if the expected container type
     #   was not completed.
     #
-    # Returns a Fifo<JsonProjection::StreamEvent> instance or raises a
+    # Returns a tuple of (Symbol, Fifo<Event>) instance or raises a
     # JsonProjection::ParseError if the character does not signal the start of
     # a value.
     def end_container(type)
-      events = Fifo.new
-
-      @state = :end_value
+      state = :end_value
+      events = Fifo.empty
 
       if @stack.pop == type
         case type
         when :object then
-          events.push(EndObject.new)
+          events = events.push(EndObject.new)
         when :array  then
-          events.push(EndArray.new)
+          events = events.push(EndArray.new)
         end
       else
         error("Expected end of #{type}")
       end
 
       if @stack.empty?
-        @state = :end_document
-        events.push(EndDocument.new)
+        state = :end_document
+        events = events.push(EndDocument.new)
       end
 
-      return events
+      return state, events
     end
 
     # Parse one of the three allowed keywords: true, false, null.
@@ -444,11 +525,11 @@ module JsonProjection
 
       if @value_buffer.size != word.size
         return nil
-      end
+      elsif @value_buffer == word
+        event = end_value(@value_buffer)
+        @value_buffer.clear
 
-      if @value_buffer == word
-        @value_buffer = ""
-        return end_value(value)
+        return :end_value, event
       else
         error("Expected #{word} keyword")
       end
@@ -463,44 +544,33 @@ module JsonProjection
     # Returns a JsonProjection::StreamEvent? subclass.
     def start_value(ch)
       case ch
-      when WS
-        return nil
       when LEFT_BRACE
-        @state = :start_object
         @stack.push(:object)
-        return StartObject.new
+        return :start_object, Fifo.pure(StartObject.new)
       when LEFT_BRACKET
-        @state = :start_array
         @stack.push(:array)
-        return StartArray.new
+        return :start_array, Fifo.pure(StartArray.new)
       when QUOTE
-        @state = :start_string
         @stack.push(:string)
-        return nil
+        return :start_string, Fifo.empty
       when T
-        @state = :start_true
         @value_buffer << ch
-        return nil
+        return :start_true, Fifo.empty
       when F
-        @state = :start_false
         @value_buffer << ch
-        return nil
+        return :start_false, Fifo.empty
       when N
-        @state = :start_null
         @value_buffer << ch
-        return nil
+        return :start_null, Fifo.empty
       when MINUS
-        @state = :start_negative_number
         @value_buffer << ch
-        return nil
+        return :start_negative_number, Fifo.empty
       when ZERO
-        @state = :start_zero
         @value_buffer << ch
-        return nil
+        return :start_zero, Fifo.empty
       when DIGIT_1_9
-        @state = :start_int
         @value_buffer << ch
-        return nil
+        return :start_int, Fifo.empty
       end
 
       error('Expected value')
@@ -510,23 +580,16 @@ module JsonProjection
     #
     # Returns a JsonProjection::StreamEvent subclass.
     def end_value(value)
-      @state = :end_value
-
       case value
       when TrueClass, FalseClass
-        return Boolean.new(value)
+        Boolean.new(value)
       when Numeric
-        return Number.new(value)
+        Number.new(value)
       when ::String
-        return JsonProjection::String.new(value)
+        JsonProjection::String.new(value)
       when NilClass
-        return Null.new
+        Null.new
       end
-    end
-
-    def prepend_and_pop(events)
-      @event_buffer = events.concat(@event_buffer)
-      return @event_buffer.pop
     end
 
     def error(message)
