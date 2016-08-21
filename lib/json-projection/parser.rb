@@ -31,14 +31,6 @@ module JsonProjection
   # A streaming JSON parser that generates SAX-like events for state changes.
   # Use the json gem for small documents. Use this for huge documents that
   # won't fit in memory.
-  #
-  # Examples
-  #
-  #   parser = JSON::Stream::Parser.new
-  #   parser.key {|key| puts key }
-  #   parser.value {|value| puts value }
-  #   parser << '{"answer":'
-  #   parser << ' 42}'
   class Parser
     BUF_SIZE      = 4096
     CONTROL       = /[\x00-\x1F]/
@@ -88,7 +80,7 @@ module JsonProjection
     #
     # Returns a JsonProject::StreamEvent subclass or raises StandardError.
     def next_event()
-
+      
     end
 
     # Advance the stream cursor until after the given event class. This method
