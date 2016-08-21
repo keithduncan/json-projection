@@ -20,6 +20,7 @@ PLATFORMS
 DEPENDENCIES
   byebug (~> 5.0.0)
   json-projection!
+  minitest (~> 5.9.0)
   minitest-focus (~> 1.1.2)
   rake (~> 11.2.2)
 
