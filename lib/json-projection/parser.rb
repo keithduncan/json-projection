@@ -112,7 +112,7 @@ module JsonProjection
         @bytes.each_char do |ch|
           @pos += 1
 
-          new_state, events = handle_character(ch)
+          new_state, events = handle_character(@state, ch)
 
           @state = new_state
           @event_buffer = events.append(@event_buffer)
