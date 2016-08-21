@@ -59,4 +59,15 @@ class ObjectStructure < JsonProjectionTest
       EndDocument.empty
     ], events("{\"foo\": false}")
   end
+
+  def test_null_value
+    assert_equal [
+      StartDocument.empty,
+      StartObject.empty,
+      Key.new("foo"),
+      Null.empty,
+      EndObject.empty,
+      EndDocument.empty
+    ], events("{\"foo\": null}")
+  end
 end
