@@ -11,6 +11,6 @@ class ObjectStructure < JsonProjectionTest
       String.new("bar"),
       EndObject.empty,
       EndDocument.empty
-    ], events("{\"foo\": \"bar\"}")
+    ], events("{\"foo\":\"bar\"}")
   end
 end
