@@ -69,7 +69,7 @@ module JsonProjection
     #           IO stream to read data from.
     #
     # Returns nothing.
-    def initialize(steam)
+    def initialize(stream)
       @stream = stream
 
       @event_buffer = Fifo.new
