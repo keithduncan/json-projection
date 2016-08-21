@@ -37,4 +37,26 @@ class ArraySchema < JsonProjectorTest
       ]
     }, project(schema, over: json))
   end
+
+  def test_top_level_array
+    json = [
+      {
+        "name" => "keith",
+        "personal detail" => "thing",
+      },
+      {
+        "name" => "cory",
+        "phone number" => "unknown",
+      }
+    ]
+
+    schema = {
+      "name" => nil,
+    }
+
+    assert_equal([
+      { "name" => "keith" },
+      { "name" => "cory" },
+    ], project(schema, over: json))
+  end
 end
