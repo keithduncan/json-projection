@@ -461,7 +461,8 @@ module JsonProjection
           error('Expected whitespace or object key start `"`')
         end
 
-        case WS
+        case ch
+        when WS
           return :value_sep, Fifo.empty
         else
           return start_value(ch)
