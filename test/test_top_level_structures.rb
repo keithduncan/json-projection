@@ -23,7 +23,6 @@ class JsonProjectionTopLevelTest < MiniTest::Unit::TestCase
   private
 
   def read_event_stream(io)
-    debugger
     parser = Parser.new(io)
 
     events = []
