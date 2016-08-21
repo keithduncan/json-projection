@@ -8,11 +8,11 @@ Gem::Specification.new do |s|
   s.email       = 'keith.duncan@github.com'
   s.files       = [
     "lib/json-projection.rb",
-    "lib/json-projection/buffer.rb",
-    "lib/json-projection/errors.rb",
-    "lib/json-projection/events.rb",
-    "lib/json-projection/fifo.rb",
     "lib/json-projection/parser.rb",
+    "lib/json-projection/parser/buffer.rb",
+    "lib/json-projection/parser/errors.rb",
+    "lib/json-projection/parser/events.rb",
+    "lib/json-projection/parser/fifo.rb",
   ]
   s.homepage    = 'https://github.com/keithduncan/json-projection'
   s.license     = 'MIT'
