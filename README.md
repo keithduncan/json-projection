@@ -4,8 +4,7 @@ Project a filtering transform over a JSON stream to avoid loading large quantiti
 `JsonProjection::Parser` is initialised with a stream containing JSON data.
 Callers then request a stream of events to build up an object model or discard.
 
-The parser is based on the state machine in
-https://github.com/dgraham/json-stream/blob/master/lib/json/stream/parser.rb
+The parser is based on the state machine in [dgraham/json-stream/lib/json/stream/parser.rb](https://github.com/dgraham/json-stream/blob/master/lib/json/stream/parser.rb)
 modified to support pulling events instead of having them pushed as the data is
 piped in.
 
