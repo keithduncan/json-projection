@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'json-projection'
-  s.version     = '0.1.1'
+  s.version     = '0.1.2'
   s.date        = '2016-08-21'
   s.summary     = "JSON structure preserving transform"
   s.description = "Iteratively parse a stream of JSON data and project it into a smaller version which can be held in memory"
