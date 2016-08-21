@@ -39,6 +39,10 @@ module JsonProjection
 
     private
 
+    def next_event
+      @parser.next_event
+    end
+
     def filter_subtree(schema, event)
       unless event.is_a?(StartObject)
         raise StandardError, "expected start object"
