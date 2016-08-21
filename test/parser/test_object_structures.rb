@@ -65,7 +65,7 @@ class ObjectStructure < JsonParserTest
       StartDocument.empty,
       StartObject.empty,
       Key.new("foo"),
-      Null.empty,
+      Null.new(nil),
       EndObject.empty,
       EndDocument.empty
     ], events("{\"foo\": null}")
@@ -152,5 +152,18 @@ class ObjectStructure < JsonParserTest
       EndObject.empty,
       EndDocument.empty
     ], events("{\"foo\": [\"bar\", 100]}")
+  end
+
+  def test_duplicate_keys
+    assert_equal [
+      StartDocument.empty,
+      StartObject.empty,
+      Key.new("foo"),
+      String.new("bar"),
+      Key.new("foo"),
+      String.new("baz"),
+      EndObject.empty,
+      EndDocument.empty
+    ], events("{\"foo\": \"bar\", \"foo\": \"baz\"}")
   end
 end
