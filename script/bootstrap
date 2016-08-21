@@ -1,0 +1,3 @@
+#!/bin/bash
+
+bundle install --local --path vendor/gems --binstubs bin

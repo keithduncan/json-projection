@@ -1,0 +1,5 @@
+#!/bin/bash
+
+script/bootstrap
+
+bin/rake test
