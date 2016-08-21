@@ -125,4 +125,32 @@ class ObjectStructure < JsonProjectionTest
       EndDocument.empty
     ], events("{\"foo\": 10e+1}")
   end
+
+  def test_nested_object_value
+    assert_equal [
+      StartDocument.empty,
+      StartObject.empty,
+      Key.new("foo"),
+      StartObject.empty,
+      Key.new("bar"),
+      Number.new(100),
+      EndObject.empty,
+      EndObject.empty,
+      EndDocument.empty
+    ], events("{\"foo\": {\"bar\": 100}}")
+  end
+
+  def test_nested_array_value
+    assert_equal [
+      StartDocument.empty,
+      StartObject.empty,
+      Key.new("foo"),
+      StartArray.empty,
+      String.new("bar"),
+      Number.new(100),
+      EndArray.empty,
+      EndObject.empty,
+      EndDocument.empty
+    ], events("{\"foo\": [\"bar\", 100]}")
+  end
 end
