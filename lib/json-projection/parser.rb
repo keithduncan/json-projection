@@ -82,7 +82,7 @@ module JsonProjection
       @state = :start_document
       @stack = []
 
-      @value_buffer = nil
+      @value_buffer = ""
       @unicode = ""
     end
 
