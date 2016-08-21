@@ -123,6 +123,6 @@ class ObjectStructure < JsonProjectionTest
       Number.new(100),
       EndObject.empty,
       EndDocument.empty
-    ], events("{\"foo\": 10e1}")
+    ], events("{\"foo\": 10e+1}")
   end
 end
