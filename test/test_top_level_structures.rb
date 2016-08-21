@@ -1,8 +1,6 @@
 require_relative 'test_helper'
 
 class TopLevelTest < JsonProjectionTest
-  include JsonProjection
-
   def test_top_level_object
     assert_equal [StartDocument.empty, StartObject.empty, EndObject.empty, EndDocument.empty], events("{}")
   end

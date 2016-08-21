@@ -7,13 +7,14 @@ require 'stringio'
 require 'byebug'
 
 class JsonProjectionTest < MiniTest::Unit::TestCase
+  include JsonProjection
 
   def stream(string)
     StringIO.new(string)
   end
 
   def events(string)
-    read_event_stream(stream("{}"))
+    read_event_stream(stream(string))
   end
 
   def read_event_stream(io)
