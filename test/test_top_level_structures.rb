@@ -1,10 +1,4 @@
-require 'minitest/autorun'
-require 'minitest/focus4'
-
-require 'json-projection'
-
-require 'stringio'
-require 'byebug'
+require_relative 'test_helper'
 
 class JsonProjectionTopLevelTest < MiniTest::Unit::TestCase
   include JsonProjection
