@@ -30,6 +30,15 @@ module JsonProjection
       @stack.empty?
     end
 
+    def ==(other)
+      return false unless other.is_a?(Fifo)
+      return stack == other.stack
+    end
+
+    def hash
+      stack.hash
+    end
+
     def append(fifo)
       return self if fifo.empty?
       return fifo if self.empty?
