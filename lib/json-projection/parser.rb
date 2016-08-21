@@ -63,8 +63,9 @@ module JsonProjection
     EXPONENT      = /[eE]/
     B,F,N,R,T,U   = %w[b f n r t u]
 
-    # Initialize a new scanner with a stream. The cursor is advanced as events
-    # are drawn from the scanner.
+    # Initialize a new parser with a stream. The stream cursor is advanced as
+    # events are drawn from the parser. The parser maintains a small data cache
+    # of bytes read from the stream.
     #
     # stream :: IO
     #           IO stream to read data from.
