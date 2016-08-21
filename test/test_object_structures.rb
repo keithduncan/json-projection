@@ -13,4 +13,15 @@ class ObjectStructure < JsonProjectionTest
       EndDocument.empty
     ], events("{\"foo\":\"bar\"}")
   end
+
+  def test_key_value_pair_with_whitespace
+    assert_equal [
+      StartDocument.empty,
+      StartObject.empty,
+      Key.new("foo"),
+      String.new("bar"),
+      EndObject.empty,
+      EndDocument.empty
+    ], events("{ \"foo\" : \"bar\" }")
+  end
 end
