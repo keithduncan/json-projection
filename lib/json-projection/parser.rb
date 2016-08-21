@@ -160,13 +160,13 @@ module JsonProjection
         when LEFT_BRACE
           @stack.push(:object)
 
-          events = Fifo.pure(StartDocument.new).push(StartObject.new)
+          events = Fifo.pure(StartDocument.empty).push(StartObject.empty)
 
           return :start_object, events
         when LEFT_BRACKET
           @stack.push(:array)
 
-          events = Fifo.pure(StartDocument.new).push(StartArray.new)
+          events = Fifo.pure(StartDocument.empty).push(StartArray.empty)
 
           return :start_array, events
         end
@@ -496,9 +496,9 @@ module JsonProjection
       if @stack.pop == type
         case type
         when :object then
-          events = events.push(EndObject.new)
+          events = events.push(EndObject.empty)
         when :array  then
-          events = events.push(EndArray.new)
+          events = events.push(EndArray.empty)
         end
       else
         error("Expected end of #{type}")
@@ -506,7 +506,7 @@ module JsonProjection
 
       if @stack.empty?
         state = :end_document
-        events = events.push(EndDocument.new)
+        events = events.push(EndDocument.empty)
       end
 
       return state, events
@@ -553,10 +553,10 @@ module JsonProjection
       case ch
       when LEFT_BRACE
         @stack.push(:object)
-        return :start_object, Fifo.pure(StartObject.new)
+        return :start_object, Fifo.pure(StartObject.empty)
       when LEFT_BRACKET
         @stack.push(:array)
-        return :start_array, Fifo.pure(StartArray.new)
+        return :start_array, Fifo.pure(StartArray.empty)
       when QUOTE
         @stack.push(:string)
         return :start_string, Fifo.empty

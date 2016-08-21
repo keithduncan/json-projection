@@ -7,25 +7,28 @@ require 'stringio'
 require 'byebug'
 
 class JsonProjectionTopLevelTest < MiniTest::Unit::TestCase
+  include JsonProjection
+
   focus
   def test_top_level_object
     events = read_event_stream(StringIO.new("{}"))
-    assert_equal [JsonProjection::StartDocument.new, JsonProjection::StartObject.new, JsonProjection::EndObject.new, JsonProjection::EndDocument.new], events
+    assert_equal [StartDocument.empty, StartObject.empty, EndObject.empty, EndDocument.empty], events
   end
 
   def test_top_level_array
     events = read_event_stream(StringIO.new("[]"))
-    assert_equal [JsonProjection::StartDocument.new, JsonProjection::StartArray.new, JsonProjection::EndArray.new, JsonProjection::EndDocument.new], events
+    assert_equal [StartDocument.empty, StartArray.empty, EndArray.empty, EndDocument.empty], events
   end
 
   private
 
   def read_event_stream(io)
-    parser = JsonProjection::Parser.new(io)
+    debugger
+    parser = Parser.new(io)
 
     events = []
 
-    while events.last != JsonProjection::EndDocument.new
+    while events.last != EndDocument.empty
       events << parser.next_event
     end
 

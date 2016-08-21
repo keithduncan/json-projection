@@ -3,8 +3,12 @@ module JsonProjection
   # Sum type
   class StreamEvent
 
+    def self.empty
+      @empty ||= new
+    end
+
     def ==(other)
-      return false unless other.is_a?(self.class)
+      other.is_a?(self.class)
     end
 
     def hash
