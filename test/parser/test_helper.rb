@@ -6,7 +6,7 @@ require 'json-projection'
 require 'stringio'
 require 'byebug'
 
-class JsonProjectionTest < MiniTest::Unit::TestCase
+class JsonParserTest < MiniTest::Unit::TestCase
   include JsonProjection
 
   def stream(string)

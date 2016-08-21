@@ -1,8 +1,8 @@
 require_relative 'test_helper'
 
-class TopLevelTest < JsonProjectionTest
+class TopLevelTest < JsonParserTest
   parallelize_me!
-  
+
   def test_top_level_object
     assert_equal [StartDocument.empty, StartObject.empty, EndObject.empty, EndDocument.empty], events("{}")
   end
