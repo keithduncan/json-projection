@@ -8,5 +8,4 @@ class TopLevelTest < JsonProjectionTest
   def test_top_level_array
     assert_equal [StartDocument.empty, StartArray.empty, EndArray.empty, EndDocument.empty], events("[]")
   end
-
 end
