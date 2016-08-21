@@ -174,13 +174,9 @@ module JsonProjection
         return
       end
 
-      if value_event.is_a?(StartObject)
+      if value_event.is_a?(StartObject) || value_event.is_a?(StartArray)
         ignore_container
         return
-      end
-
-      if value_event.is_a?(StartArray)
-        ignore_container
       end
 
       raise StandardError, "unknown value type to ignore #{value_event.class}"
