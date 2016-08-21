@@ -9,7 +9,6 @@ require 'byebug'
 class JsonProjectionTopLevelTest < MiniTest::Unit::TestCase
   include JsonProjection
 
-  focus
   def test_top_level_object
     events = read_event_stream(StringIO.new("{}"))
     assert_equal [StartDocument.empty, StartObject.empty, EndObject.empty, EndDocument.empty], events
