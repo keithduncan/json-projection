@@ -303,7 +303,6 @@ module JsonProjection
           @value_buffer.clear
 
           state = :end_value
-          @pos -= 1
 
           state, new_events = handle_character(state, ch)
 
@@ -332,7 +331,6 @@ module JsonProjection
           @value_buffer.clear
 
           state = :end_value
-          @pos -= 1
 
           state, new_events = handle_character(state, ch)
 
@@ -360,7 +358,6 @@ module JsonProjection
           @value_buffer.clear
 
           state = :end_value
-          @pos -= 1
 
           state, new_events = handle_character(state, ch)
 
@@ -383,7 +380,6 @@ module JsonProjection
           @value_buffer.clear
 
           state = :end_value
-          @pos -= 1
 
           state, new_events = handle_character(state, ch)
 
