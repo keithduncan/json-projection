@@ -24,4 +24,17 @@ class ObjectStructure < JsonProjectionTest
       EndDocument.empty
     ], events("{ \"foo\" : \"bar\" }")
   end
+
+  def test_multiple_key_value_pairs
+    assert_equal [
+      StartDocument.empty,
+      StartObject.empty,
+      Key.new("foo"),
+      String.new("bar"),
+      Key.new("qux"),
+      String.new("quux"),
+      EndObject.empty,
+      EndDocument.empty
+    ], events("{\"foo\": \"bar\", \"qux\": \"quux\"}")
+  end
 end
