@@ -52,11 +52,11 @@ don't need:
 }
 ```
 
-We only need the `user` key, and really just the the `name` and `jobs` keys.
-We could implementing a schema-specific streaming event handler for this data to
-ignore the keys we don't want and generate an object model for the ones we do.
-That's a pain to build and maintain, what we really want is a projection over
-the data just like we do when `SELECT list, of, keys FROM table`.
+We only need the `user` key, and really just the the `name` and `jobs`'s title's
+keys. We could implementing a schema-specific streaming event handler for this
+data to ignore the keys we don't want and generate an object model for the ones
+we do. That's a pain to build and maintain, what we really want is a projection
+over the data just like we do when `SELECT list, of, keys FROM table`.
 
 ```ruby
 stream = File.open("somewhere.json", "r")
