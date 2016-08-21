@@ -127,18 +127,6 @@ module JsonProjection
       end
     end
 
-    # Advance the stream cursor until after the given event class. This method
-    # considers Object and Array nesting, use it to skip a subset of the input
-    # document stream.
-    #
-    # If the document is malformed and EOF is reached before the terminating
-    # event, JsonProject::ParseError is raised.
-    #
-    # Returns nothing, may raise StandardError.
-    def read_until(klass)
-
-    end
-
     private
 
     attr_reader :stream
