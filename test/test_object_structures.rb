@@ -1,6 +1,8 @@
 require_relative 'test_helper'
 
 class ObjectStructure < JsonProjectionTest
+  parallelize_me!
+
   def test_simple_key_value_pair
     assert_equal [
       StartDocument.empty,
