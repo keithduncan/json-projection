@@ -98,7 +98,7 @@ module JsonProjection
     # Returns a JsonProject::StreamEvent subclass or raises StandardError.
     def next_event()
       # Are there any already read events, return the oldest
-      @event_buffer, event = @event_buffer.pop
+      event = @event_buffer.pop!
       return event unless event.nil?
 
       if @state == :end_document
@@ -121,15 +121,13 @@ module JsonProjection
 
         @stream_position += 1
 
-        new_state, events = handle_character(@state, character)
+        new_state, new_events = handle_character(@state, character)
 
         @state = new_state
-        @event_buffer = events.append(@event_buffer)
+        @event_buffer.prepend!(new_events)
 
-        unless @event_buffer.empty?
-          @event_buffer, event = @event_buffer.pop
-          return event
-        end
+        event = @event_buffer.pop!
+        return event unless event.nil?
       end
     end
 
@@ -156,13 +154,13 @@ module JsonProjection
         when LEFT_BRACE
           @stack.push(:object)
 
-          events = Fifo.pure(StartDocument.empty).push(StartObject.empty)
+          events = Fifo.pure(StartObject.empty, StartDocument.empty)
 
           return :start_object, events
         when LEFT_BRACKET
           @stack.push(:array)
 
-          events = Fifo.pure(StartDocument.empty).push(StartArray.empty)
+          events = Fifo.pure(StartArray.empty, StartDocument.empty)
 
           return :start_array, events
         end
@@ -301,8 +299,9 @@ module JsonProjection
           state = :end_value
 
           state, new_events = handle_character(state, ch)
+          events.prepend!(new_events)
 
-          return state, new_events.append(events)
+          return state, events
         end
 
       when :start_float
@@ -329,8 +328,9 @@ module JsonProjection
           state = :end_value
 
           state, new_events = handle_character(state, ch)
+          events.prepend!(new_events)
 
-          return state, new_events.append(events)
+          return state, events
         end
 
       when :start_exponent
@@ -356,8 +356,9 @@ module JsonProjection
           state = :end_value
 
           state, new_events = handle_character(state, ch)
+          events.prepend!(new_events)
 
-          return state, new_events.append(events)
+          return state, events
         end
 
       when :start_int
@@ -378,8 +379,9 @@ module JsonProjection
           state = :end_value
 
           state, new_events = handle_character(state, ch)
+          events.prepend!(new_events)
 
-          return state, new_events.append(events)
+          return state, events
         end
 
       when :start_true
@@ -483,14 +485,14 @@ module JsonProjection
     # a value.
     def end_container(type)
       state = :end_value
-      events = Fifo.empty
+      events = Fifo.pure
 
       if @stack.pop == type
         case type
         when :object then
-          events = events.push(EndObject.empty)
+          events.push!(EndObject.empty)
         when :array  then
-          events = events.push(EndArray.empty)
+          events.push!(EndArray.empty)
         end
       else
         error("Expected end of #{type}")
@@ -498,7 +500,7 @@ module JsonProjection
 
       if @stack.empty?
         state = :end_document
-        events = events.push(EndDocument.empty)
+        events.push!(EndDocument.empty)
       end
 
       return state, events

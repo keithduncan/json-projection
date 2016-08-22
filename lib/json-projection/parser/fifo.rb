@@ -2,28 +2,23 @@ module JsonProjection
   class Fifo
 
     def self.empty
-      @empty ||= self.new
+      @empty ||= self.new([].freeze)
     end
 
-    def self.pure(val)
-      Fifo.new([val])
+    def self.pure(*vals)
+      Fifo.new(vals)
     end
 
     def initialize(stack = [])
       @stack = stack
     end
 
-    def push(val)
-      Fifo.new(@stack.dup.insert(0, val))
+    def push!(val)
+      @stack.insert(0, val)
     end
 
-    def pop()
-      return self, nil if empty?
-
-      init = @stack.slice(0, @stack.size - 1)
-      last = @stack.last
-
-      return Fifo.new(init), last
+    def pop!
+      @stack.pop
     end
 
     def empty?
@@ -39,15 +34,20 @@ module JsonProjection
       stack.hash
     end
 
-    def append(fifo)
-      return self if fifo.empty?
-      return fifo if self.empty?
-      Fifo.new(@stack.concat(fifo.stack))
+    def prepend!(fifo)
+      return if fifo.empty?
+      if empty?
+        @stack = fifo.stack.dup
+        return
+      end
+      @stack = fifo.stack.concat(@stack)
     end
 
     protected
 
-    attr_reader :stack
+    def stack
+      @stack
+    end
 
   end
 end
