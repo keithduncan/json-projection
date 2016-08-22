@@ -7,16 +7,16 @@ class JsonProjectorTest < Minitest::Test
 
   parallelize_me!
 
-  def stream(str)
-    StringIO.new(str)
-  end
+  def project(schema, over: "", json: nil, stream: nil)
+    if stream.nil?
+      if json.nil?
+        json = over.to_json
+      end
 
-  def project(schema, over: "", json: nil)
-    if json == nil
-      json = over.to_json
+      stream = StringIO.new(json)
     end
 
-    Projector.new(stream(json)).project(schema)
+    Projector.new(stream).project(schema)
   end
 
 end
