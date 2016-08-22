@@ -34,7 +34,6 @@ module JsonProjection
   # Use the json gem for small documents. Use this for huge documents that
   # won't fit in memory.
   class Parser
-    BUF_SIZE      = 4096
     CONTROL       = /[\x00-\x1F]/
     WS            = /[ \n\t\r]/
     HEX           = /[0-9a-fA-F]/
@@ -67,12 +66,16 @@ module JsonProjection
     # events are drawn from the parser. The parser maintains a small data cache
     # of bytes read from the stream.
     #
-    # stream :: IO
-    #           IO stream to read data from.
+    # stream     :: IO
+    #               IO stream to read data from.
+    #
+    # chunk_size :: Integer
+    #               Number of bytes to read from the stream at a time.
     #
     # Returns nothing.
-    def initialize(stream)
+    def initialize(stream, chunk_size = 4096)
       @stream = stream
+      @chunk_size = chunk_size
 
       @event_buffer = Fifo.new
 
@@ -102,7 +105,7 @@ module JsonProjection
 
       while true do
         if @bytes.nil? || @bytes.empty?
-          data = stream.read(BUF_SIZE)
+          data = stream.read(@chunk_size)
           if data == nil # hit EOF
             error("unexpected EOF")
           end
