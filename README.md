@@ -20,36 +20,38 @@ Given the following JSON data, imagine it continuing with many more keys you
 don't need:
 
 ```json
-{
-  "user": {
-    "name": "keith",
-    "age": 26,
-    "jobs": [
-      {
-        "title": "director of overworking",
-        "company": "south coast software",
-        "department": "most",
-      },
-      {
-        "title": "some kind of computering",
-        "company": "github the website dot com",
-        "department": true
-      }
-    ]
-  },
-  "another key": {
+[
+  {
+    "user": {
+      "name": "keith",
+      "age": 26,
+      "jobs": [
+        {
+          "title": "director of overworking",
+          "company": "south coast software",
+          "department": "most"
+        },
+        {
+          "title": "some kind of computering",
+          "company": "github the website dot com",
+          "department": true
+        }
+      ]
+    },
+    "another key": {
 
-  },
-  "woah this document is huge": {
+    },
+    "woah this document is huge": {
 
-  },
-  "many megabytes": {
+    },
+    "many megabytes": {
 
-  },
-  "etc": {
+    },
+    "etc": {
 
+    }
   }
-}
+]
 ```
 
 We only need the `user` key, and really just the the `user`'s `name` key and
@@ -74,7 +76,8 @@ schema = {
 }
 data = projector.project(schema)
 
-# data = {
+# data = [
+# {
 #   "user" => {
 #     "name" => "keith",
 #     "jobs" => [
@@ -83,6 +86,7 @@ data = projector.project(schema)
 #     ]
 #   }
 # }
+# ]
 #
 # use data...
 ```
