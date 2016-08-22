@@ -1,5 +1,7 @@
 require_relative 'test_helper'
 
+require 'ruby-prof'
+
 class ProjectFile < JsonProjectorTest
 
   def test_project_file
@@ -30,11 +32,19 @@ class ProjectFile < JsonProjectorTest
     if file_path.nil? || file_path.empty?
       return
     end
-    
+
     file = File.open(file_path, 'r')
 
-    data = begin
-      project(schema, stream: file)
+    begin
+      result = RubyProf.profile do
+        project(schema, stream: file)
+      end
+
+      # print a graph profile to text
+      printer = RubyProf::CallStackPrinter.new(result)
+      File.open('tmp/profile.html', 'w') do |f|
+        printer.print(f, {})
+      end
     ensure
       file.close
     end
