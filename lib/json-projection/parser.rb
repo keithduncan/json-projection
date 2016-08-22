@@ -79,10 +79,12 @@ module JsonProjection
 
       @event_buffer = Fifo.new
 
-      @bytes_buffer = Buffer.new
-      @bytes = nil
+      @character_buffer = Buffer.new
 
-      @pos = -1
+      @characters_cursor = -1
+      @characters = nil
+
+      @stream_position = -1
       @state = :start_document
       @stack = []
 
@@ -104,22 +106,22 @@ module JsonProjection
       end
 
       while true do
-        if @bytes.nil? || @bytes.empty?
+        if @characters.nil? || @characters_cursor == @characters.size
           data = stream.read(@chunk_size)
           if data == nil # hit EOF
             error("unexpected EOF")
           end
 
-          @bytes = @bytes_buffer.<<(data).each_char.to_a
+          @characters = @character_buffer.<<(data).each_char.to_a
+          @characters_cursor = 0
         end
 
-        head = @bytes.first
-        tail = @bytes.slice!(1, @bytes.size - 1)
+        character = @characters[@characters_cursor]
+        @characters_cursor += 1
 
-        @bytes = tail
-        @pos += 1
+        @stream_position += 1
 
-        new_state, events = handle_character(@state, head)
+        new_state, events = handle_character(@state, character)
 
         @state = new_state
         @event_buffer = events.append(@event_buffer)
@@ -590,7 +592,7 @@ module JsonProjection
     end
 
     def error(message)
-      raise ParseError, "#{message}: char #{@pos}"
+      raise ParseError, "#{message}: char #{@stream_position}"
     end
   end
 
