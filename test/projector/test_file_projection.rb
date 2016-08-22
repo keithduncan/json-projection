@@ -27,6 +27,10 @@ class ProjectFile < JsonProjectorTest
     }
 
     file_path = ENV['JSON_FILE']
+    if file_path.nil? || file_path.empty?
+      return
+    end
+    
     file = File.open(file_path, 'r')
 
     data = begin
