@@ -133,6 +133,16 @@ module JsonProjection
       end
     end
 
+    def each
+      return enum_for(:each) unless block_given?
+
+      while true
+        event = next_event
+        yield event
+        return if event.is_a?(EndDocument)
+      end
+    end
+
     private
 
     def stream
