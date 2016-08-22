@@ -11,6 +11,8 @@ Gem::Specification.new do |s|
     "lib/json-projection/parser/errors.rb",
     "lib/json-projection/parser/events.rb",
     "lib/json-projection/parser/fifo.rb",
+    "lib/json-projection/parser/unicode_range.rb",
+    "lib/json-projection/parser/unicode_set.rb",
     "lib/json-projection/parser.rb",
     "lib/json-projection/projector.rb",
     "lib/json-projection.rb",

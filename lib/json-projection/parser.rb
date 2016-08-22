@@ -27,6 +27,8 @@ require_relative 'parser/buffer'
 require_relative 'parser/events'
 require_relative 'parser/errors'
 require_relative 'parser/fifo'
+require_relative 'parser/unicode_range'
+require_relative 'parser/unicode_set'
 
 module JsonProjection
 
@@ -34,12 +36,12 @@ module JsonProjection
   # Use the json gem for small documents. Use this for huge documents that
   # won't fit in memory.
   class Parser
-    CONTROL       = /[\x00-\x1F]/
-    WS            = /[ \n\t\r]/
-    HEX           = /[0-9a-fA-F]/
-    DIGIT         = /[0-9]/
-    DIGIT_1_9     = /[1-9]/
-    DIGIT_END     = /\d$/
+    CONTROL       = UnicodeRange.new(0, 31)
+    WS            = UnicodeSet.new(32, 10, 11, 13)
+    UPPER         = UnicodeRange.new(65, 90)
+    LOWER         = UnicodeRange.new(97, 122)
+    DIGIT         = UnicodeRange.new(48, 57)
+    DIGIT_1_9     = UnicodeRange.new(49, 57)
     TRUE_RE       = /[rue]/
     FALSE_RE      = /[alse]/
     NULL_RE       = /[ul]/
@@ -59,7 +61,7 @@ module JsonProjection
     MINUS         = '-'
     PLUS          = '+'
     POINT         = '.'
-    EXPONENT      = /[eE]/
+    EXPONENT      = UnicodeSet.new(101, 69)
     B,F,N,R,T,U   = %w[b f n r t u]
 
     # Initialize a new parser with a stream. The stream cursor is advanced as
@@ -231,7 +233,7 @@ module JsonProjection
 
       when :unicode_escape
         case ch
-        when HEX
+        when DIGIT, LOWER, UPPER
           @unicode << ch
           if @unicode.size == 4
             codepoint = @unicode.slice!(0, 4).hex
@@ -348,8 +350,6 @@ module JsonProjection
           @value_buffer << ch
           return :in_exponent, Fifo.empty
         else
-          error('Expected 0-9 digit') unless @value_buffer =~ DIGIT_END
-
           events = Fifo.pure(end_value(@value_buffer.to_f))
           @value_buffer.clear
 
