@@ -23,4 +23,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'byebug', '~> 5.0.0'
   s.add_development_dependency 'minitest-focus', '~> 1.1.2'
   s.add_development_dependency 'minitest', '~> 5.9.0'
+  s.add_development_dependency 'ruby-prof', '~> 0.15.9'
 end

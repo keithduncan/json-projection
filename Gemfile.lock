@@ -13,6 +13,7 @@ GEM
     minitest-focus (1.1.2)
       minitest (>= 4, < 6)
     rake (11.2.2)
+    ruby-prof (0.15.9)
 
 PLATFORMS
   ruby
@@ -23,6 +24,7 @@ DEPENDENCIES
   minitest (~> 5.9.0)
   minitest-focus (~> 1.1.2)
   rake (~> 11.2.2)
+  ruby-prof (~> 0.15.9)
 
 BUNDLED WITH
    1.12.5
