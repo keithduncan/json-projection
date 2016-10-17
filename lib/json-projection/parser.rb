@@ -94,6 +94,17 @@ module JsonProjection
       @unicode = ""
     end
 
+    def each_event
+      return enum_for(:each_event) unless block_given?
+
+      loop do
+        event = next_event
+        yield event
+
+        break if event.is_a?(EndDocument)
+      end
+    end
+
     # Draw bytes from the stream until an event can be constructed. May raise
     # IO errors.
     #
