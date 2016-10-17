@@ -118,7 +118,7 @@ module JsonProjection
         error("already EOF, no more events")
       end
 
-      while true do
+      loop do
         if @characters.nil? || @characters_cursor == @characters.size
           data = stream.read(@chunk_size)
           if data == nil # hit EOF
