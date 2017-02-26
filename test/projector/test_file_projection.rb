@@ -1,6 +1,7 @@
 require_relative 'test_helper'
 
 require 'benchmark'
+require "benchmark/memory"
 
 class ProjectFile < JsonProjectorTest
 
@@ -33,8 +34,9 @@ class ProjectFile < JsonProjectorTest
       return
     end
 
-    Benchmark.bmbm { |x|
+    Benchmark.memory { |x|
       x.report("project (pure ruby)") { project(schema, stream: File.open(file_path, 'r')) }
+      x.compare!
     }
   end
 
