@@ -18,7 +18,7 @@ class ProjectFile < JsonProjectorTest
       "ref" => nil,
       "compare" => nil,
       "commits" => {
-        "discinct" => nil,
+        "distinct" => nil,
         "message" => nil,
         "url" => nil,
         "id" => nil,
