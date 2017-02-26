@@ -1,6 +1,6 @@
 require_relative 'test_helper'
 
-require 'ruby-prof'
+require 'benchmark'
 
 class ProjectFile < JsonProjectorTest
 
@@ -33,21 +33,9 @@ class ProjectFile < JsonProjectorTest
       return
     end
 
-    file = File.open(file_path, 'r')
-
-    begin
-      result = RubyProf.profile do
-        project(schema, stream: file)
-      end
-
-      # print a graph profile to text
-      printer = RubyProf::CallStackPrinter.new(result)
-      File.open('tmp/profile.html', 'w') do |f|
-        printer.print(f, {})
-      end
-    ensure
-      file.close
-    end
+    Benchmark.bmbm { |x|
+      x.report("project (pure ruby)") { project(schema, stream: File.open(file_path, 'r')) }
+    }
   end
 
 end
